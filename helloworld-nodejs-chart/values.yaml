@@ -1,0 +1,13 @@
+deployment:
+  name: helloworld-nodejs
+  replicaCount: 1
+  containerPort: 8080
+  nodeEnv: development
+
+service:
+  name: helloworld-nodejs-svc
+  port: 80
+
+image:
+  repository: dleurs/helloworld-nodejs # index.docker.io/dleurs/cqrs-dispatcher
+  # tag: {{ .Chart.AppVersion }}

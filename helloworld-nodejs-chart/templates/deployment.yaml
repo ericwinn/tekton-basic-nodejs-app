@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.deployment.name }}
+  name: {{ .Values.deployment.name }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.name }}
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.name }}
+    spec:
+      containers:
+      - image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+        name: {{ .Values.deployment.name }}
+        ports:
+        - containerPort: {{ .Values.deployment.containerPort }}
+        env:
+          - name: PORT
+            value: "{{ .Values.deployment.containerPort }}"
+          - name: NODE_ENV
+            value: "{{ .Values.deployment.nodeEnv }}"
+        resources: {}
+status: {}
+
