@@ -1,11 +1,14 @@
 deployment:
   name: helloworld-nodejs
+  namespace: default
   replicaCount: 1
   containerPort: 8080
   nodeEnv: development
 
+
 service:
   name: helloworld-nodejs-svc
+  namespace: default
   port: 80
 
 image:

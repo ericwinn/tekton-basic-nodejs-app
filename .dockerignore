@@ -1,7 +1,9 @@
+helm
+
 node_modules
 npm-debug.log
 nodemon.json
 build
-helm
 .vscode
 .gitignore
+README.md
