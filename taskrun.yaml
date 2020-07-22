@@ -1,8 +1,7 @@
-# Source: helloworld-nodejs-chart/templates/tekton-build-task.yaml
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
-  name: build-task-run-1-0-5 
+  name: build-task-run-1-0-6 
 spec:
   serviceAccountName: tekton-sa
   taskRef:
