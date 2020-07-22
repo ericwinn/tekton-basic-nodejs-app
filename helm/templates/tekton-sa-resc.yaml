@@ -9,6 +9,8 @@ apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
 metadata:
   name: {{ .Values.tekton.dockerTargetResc.name }}
+  annotations:
+    helm.sh/hook: pre-install
 spec:
   type: image
   params:

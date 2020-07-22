@@ -5,6 +5,8 @@ metadata:
     app: {{ .Values.deployment.name }}
   name: {{ .Values.deployment.name }}
   namespace: {{ .Values.deployment.namespace }}
+  annotations:
+    helm.sh/hook: post-install
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
