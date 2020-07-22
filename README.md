@@ -84,4 +84,10 @@ push "AlgoCD working with helm"
 res > main, modify "Hello World!" to "Hello World 2!"
 ```
 ```bash
+docker build . -t dleurs/helloworld-nodejs:1.0.2
+docker push dleurs/helloworld-nodejs:1.0.2
 ```
+
+helm > chart, appVersion 1.0.2
+
+git push
