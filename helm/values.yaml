@@ -5,12 +5,29 @@ deployment:
   containerPort: 8080
   nodeEnv: development
 
-
 service:
   name: helloworld-nodejs-svc
   namespace: default
   port: 80
 
 image:
+  hub: index.docker.io
   repository: dleurs/helloworld-nodejs # index.docker.io/dleurs/cqrs-dispatcher
   # tag: {{ .Chart.AppVersion }}
+
+tekton:
+  serviceAccount:
+    name: tekton-sa
+    secretDockerCredsName: docker-creds
+  dockerTargetResc:
+    name: docker-target-resc
+  gitSourceResc:
+    name: git-source-resc
+    gitUrl: https://github.com/dleurs/tekton-basic-nodejs-app
+  task:
+    name: build-task
+    kanikoVersion: v0.16.0
+  taskRun:
+    name: build-task-run
+    pathToDockerFile: 
+    pathToContext: 

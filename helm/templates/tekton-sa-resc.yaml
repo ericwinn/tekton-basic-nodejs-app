@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.tekton.serviceAccount.name }}
+secrets:
+  - name: {{ .Values.tekton.serviceAccount.secretDockerCredsName }} 
+--- 
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: {{ .Values.tekton.dockerTargetResc.name }}
+spec:
+  type: image
+  params:
+    - name: url
+      value: "{{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: {{ .Values.tekton.gitSourceResc.name }}
+spec:
+  type: git
+  params:
+    - name: revision
+      value: master
+    - name: url
+      value: {{ .Values.tekton.gitSourceResc.gitUrl }}
