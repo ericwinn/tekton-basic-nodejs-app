@@ -78,7 +78,10 @@ argocd app list
 argocd app get helloworld-nodejs
 argocd app sync helloworld-nodejs
 ```
+On navigator, http://51.178.XX.XXX, => Hello World!
+push "AlgoCD working with helm"
 ```bash
+res > main, modify "Hello World!" to "Hello World 2!"
 ```
 ```bash
 ```
