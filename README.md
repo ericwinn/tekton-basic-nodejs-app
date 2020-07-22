@@ -91,3 +91,10 @@ docker push dleurs/helloworld-nodejs:1.0.2
 helm > chart, appVersion 1.0.2
 
 git push
+```bash
+argocd app set helloworld-nodejs --sync-policy automated
+```
+By default (and as a safety mechanism), automated sync will not delete resources when Argo CD detects the resource is no longer defined in Git. To prune the resources, a manual sync can always be performed (with pruning checked). Pruning can also be enabled to happen automatically as part of the automated sync by running
+```bash
+# argocd app set <APPNAME> --auto-prune 
+```
