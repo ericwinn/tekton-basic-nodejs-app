@@ -44,14 +44,10 @@ spec:
   taskRef:
     name: {{ .Values.tekton.task.name }}
   params:
-    {{- if .Values.tekton.task.pathToDockerFile -}}
     - name: pathToDockerFile
-      value: {{ .Values.tekton.task.pathToDockerFile }} 
-    {{- end -}}
-    {{- if .Values.tekton.task.pathToContext -}}
+      value: {{ .Values.tekton.taskRun.pathToDockerFile | default "Dockerfile" }} 
     - name: pathToContext
-      value: {{ .Values.tekton.task.pathToContext }} 
-    {{- end -}}
+      value: {{ .Values.tekton.taskRun.pathToContext | default "/workspace/git-source" }} 
   resources:
     inputs:
       - name: git-source

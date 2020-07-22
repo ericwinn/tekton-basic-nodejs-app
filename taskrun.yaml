@@ -1,0 +1,23 @@
+# Source: helloworld-nodejs-chart/templates/tekton-build-task.yaml
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: build-task-run
+spec:
+  serviceAccountName: tekton-sa
+  taskRef:
+    name: build-task
+  params:
+    - name: pathToDockerFile
+      value: Dockerfile 
+    - name: pathToContext
+      value: /workspace/git-source 
+  resources:
+    inputs:
+      - name: git-source
+        resourceRef:
+          name: git-source-resc
+    outputs:
+      - name: builtImage
+        resourceRef:
+          name: docker-target-resc

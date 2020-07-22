@@ -29,5 +29,6 @@ tekton:
     kanikoVersion: v0.16.0
   taskRun:
     name: build-task-run
+    paramsSet: false
     pathToDockerFile: 
     pathToContext: 

@@ -11,6 +11,7 @@ docker build . -t dleurs/helloworld-nodejs:1.0.1
 docker push dleurs/helloworld-nodejs:1.0.1
 ```
 ```bash
+helm template ./helm
 helm install helloworld-nodejs ./helm # check helm/values.yaml (image.repository) and helm/Chart.yaml (appVersion)
 # corresponding to docker image pushed
 ```
