@@ -6,14 +6,15 @@ Go to https://www.ovh.com/manager/public-cloud/; Managed Kubernetes Service<br/>
 Create a Kubernetes cluster (wait around 5 minuts)<br/>
 Then, add two nodes B2-7-FLEX (wait around 10-15 minuts)<br/> 
 Then, grap the kubeconfig and paste it on ~/.kube/config<br/>
-### Install Tekton
+## Step 2 : Install Tekton
 https://github.com/tektoncd/pipeline<br/>
 https://github.com/tektoncd/pipeline/blob/master/docs/tutorial.md<br/>
-Install tekton cli,tkn
+Install tekton cli, tkn :
 ```bash
 brew tap tektoncd/tools
 brew install tektoncd/tools/tektoncd-cli
 ``` 
+Install tekton on cluster : 
 ```bash
 kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 ```
@@ -33,6 +34,9 @@ Change helm/values.yaml :
 - image.repository to docker repo
 - image.tag to 1.0.0
 Change helm/Charts.yaml > version: 0.1.0 <br/> 
+
+If you are using a private git repo, please look at :<br/>
+https://github.com/dleurs/tekton-basic-nodejs-app-private-repo
 
 ## Step 3 : Installing AlgoCD 
 https://argoproj.github.io/argo-cd/getting_started/<br/>
