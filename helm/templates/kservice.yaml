@@ -1,0 +1,21 @@
+{{ if eq .Values.knServing.use true }}
+apiVersion: serving.knative.dev/v1 # Current version of Knative
+kind: Service
+metadata:
+  name: {{ .Values.knServing.name }} # The name of the app
+  namespace: {{ .Values.knServing.namespace }} # The namespace the app will use
+  {{ if eq .Values.knServing.clusterLocal true }}
+  labels:
+    serving.knative.dev/visibility: cluster-local
+  {{ end }}
+spec:
+  template:
+    {{ if eq .Values.knServing.scaleToZero false }}
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1" # No cold start
+    {{ end }}
+    spec:
+      containers:
+        - image: "{{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}" # Reference to the image of the app
+{{ end }}

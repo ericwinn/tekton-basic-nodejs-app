@@ -38,6 +38,16 @@ Change helm/Charts.yaml > version: 0.1.0 <br/>
 If you are using a private git repo, please look at :<br/>
 https://github.com/dleurs/tekton-basic-nodejs-app-private-repo
 
+
+Get helm cli : https://helm.sh/docs/intro/install/
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+# Test the repo
+cd forked_github_repo
+helm template ./helm
+```
 ## Step 3 : Installing AlgoCD 
 https://argoproj.github.io/argo-cd/getting_started/<br/>
 Install algocd on your teminal
@@ -121,4 +131,164 @@ kubectl get pod
 ```
 ```bash
 curl 51.178.XXX.XXX # Hello World 2!
+```
+
+## Go Beyond - Step 5 - Install Istio and Knative Serving v0.16
+
+https://knative.dev/docs/install/any-kubernetes-cluster/
+
+Install the Custom Resource Definitions :
+```bash
+kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-crds.yaml
+```
+Install the core components of Serving :
+```bash
+kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-core.yaml
+```
+Install istioctl on your laptop terminal
+```bash
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-1.6.5
+export PATH=$PWD/bin:$PATH
+```
+Install Istio 1.6.5 for Knative with sidecar injection
+```bash
+cat << EOF > ./istio-minimal-operator.yaml
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  values:
+    global:
+      proxy:
+        autoInject: enabled
+      useMCP: false
+      # The third-party-jwt is not enabled on all k8s.
+      # See: https://istio.io/docs/ops/best-practices/security/#configure-third-party-service-account-tokens
+      jwtPolicy: first-party-jwt
+
+  addonComponents:
+    pilot:
+      enabled: true
+    prometheus:
+      enabled: false
+
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+      - name: cluster-local-gateway
+        enabled: true
+        label:
+          istio: cluster-local-gateway
+          app: cluster-local-gateway
+        k8s:
+          service:
+            type: ClusterIP
+            ports:
+            - port: 15020
+              name: status-port
+            - port: 80
+              name: http2
+            - port: 443
+              name: https
+EOF
+```
+```bash
+istioctl manifest apply -f istio-minimal-operator.yaml # around 2-3 minuts
+/bin/rm -rf istio-minimal-operator.yaml
+```
+```bash
+kubectl label namespace knative-serving istio-injection=enabled
+```
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: "security.istio.io/v1beta1"
+kind: "PeerAuthentication"
+metadata:
+  name: "default"
+  namespace: "knative-serving"
+spec:
+  mtls:
+    mode: PERMISSIVE
+EOF
+```
+Knative Istio controller
+```bash
+kubectl apply --filename https://github.com/knative/net-istio/releases/download/v0.16.0/release.yaml
+```
+### Checking the install
+```bash
+kubectl get pods --namespace istio-system
+kubectl get pods --namespace knative-serving
+```
+
+### Test with a hello world
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: serving.knative.dev/v1 # Current version of Knative
+kind: Service
+metadata:
+  name: helloworld-go # The name of the app
+  namespace: default # The namespace the app will use
+  #labels:
+  #  serving.knative.dev/visibility: cluster-local
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1" # No cold start
+    spec:
+      containers:
+        - image: gcr.io/knative-samples/helloworld-go # Reference to the image of the app
+          env:
+            - name: TARGET # The environment variable printed out by the sample app
+              value: "Go Sample v1"
+EOF
+```
+
+## Go Beyond - Step 6 - HelloWorld NodeJS with Knative Serving 
+
+## Go Beyond - Step 7 - Setup DNS
+https://www.ovh.com/manager/web/<br/>
+You will need a domain for the following, you can buy one on OVH, a .fr cost 5 euros.<br/>
+Here we will use mydomain.fr<br/>
+First, get external IP of our HelloWorld NodeJS
+```bash
+kubectl get svc helloworld-nodejs-svc # 51.178.XXX.XXX
+```
+Go to OVH Web > Domains > mydomain.fr > DNS zone > Add an entry > A
+- Sub-domain : helloworld   .mydomain.fr
+- Target : 51.178.XXX.XXX
+
+```bash
+curl http://helloworld.mydomain.fr/ # <h1>Hello World!</h1>
+```
+Same for argocd server
+```bash
+kubectl get svc argocd-server -n argocd # 51.178.XXX.XXX
+# Do OVH Web stuff as above
+On browser : http://argocd.mydomain.fr/
+```
+
+## To go beyond -  Step 6 : Setup HTTPS, Cert Manager and Let's Encrypt
+
+### Install cert-manager
+https://cert-manager.io/docs/installation/kubernetes/#installing-with-helm
+```bash
+kubectl create namespace cert-manager
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+```
+```bash
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.1/cert-manager-legacy.crds.yaml
+
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --version v0.15.1
+```
+```bash
+kubectl get pods --namespace cert-manager
+```
+```bash
 ```
