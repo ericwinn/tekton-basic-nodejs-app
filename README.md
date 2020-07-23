@@ -33,6 +33,7 @@ Change helm/values.yaml :
 - tekton.gitSourceResc.gitUrl to your git url forked
 - image.repository to docker repo
 - image.tag to 1.0.0
+- knService.use : false
 Change helm/Charts.yaml > version: 0.1.0 <br/> 
 
 If you are using a private git repo, please look at :<br/>
@@ -236,7 +237,7 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/minScale: "1" # No cold start
+        autoscaling.knative.dev/minScale: "1" # No scale to zero
     spec:
       containers:
         - image: gcr.io/knative-samples/helloworld-go # Reference to the image of the app
@@ -246,27 +247,56 @@ spec:
 EOF
 ```
 
-## Go Beyond - Step 6 - HelloWorld NodeJS with Knative Serving 
+## Go Beyond - Step 6 - HelloWorld NodeJS with Knative Serving
+
+Helm > values.yaml > knService.use : true
+```bash
+git add -A; git commit -m "Use Knative and Istio"; git push origin master;
+```
+
+```bash
+kubectl get ksvc
+kubectl --namespace istio-system get service istio-ingressgateway # Take External IP 51.178.XXX.XXX
+curl -H "Host: helloworld-nodejs.default.example.com" http://51.178.XXX.XXX # Hello World
+```
 
 ## Go Beyond - Step 7 - Setup DNS
 https://www.ovh.com/manager/web/<br/>
 You will need a domain for the following, you can buy one on OVH, a .fr cost 5 euros.<br/>
-Here we will use mydomain.fr<br/>
-First, get external IP of our HelloWorld NodeJS
+Here we will use mydomain.fr as an example<br/>
+First, get external IP of Istio
 ```bash
-kubectl get svc helloworld-nodejs-svc # 51.178.XXX.XXX
+kubectl --namespace istio-system get service istio-ingressgateway # Take External IP 51.178.XXX.XXX
 ```
 Go to OVH Web > Domains > mydomain.fr > DNS zone > Add an entry > A
-- Sub-domain : helloworld   .mydomain.fr
+- Sub-domain : *.default  .mydomain.fr
 - Target : 51.178.XXX.XXX
+*.default IN A 51.178.XXX.XXX
+
+kubectl edit cm config-domain --namespace knative-serving
+```
+```bash
+apiVersion: v1
+data:
+  mydomain.fr: ""
+kind: ConfigMap
+[...]
+```
 
 ```bash
-curl http://helloworld.mydomain.fr/ # <h1>Hello World!</h1>
+kubectl get ksvc
+curl http://helloworld-nodejs.default.mydomain.fr # <h1>Hello World!</h1>
 ```
 Same for argocd server
 ```bash
 kubectl get svc argocd-server -n argocd # 51.178.XXX.XXX
-# Do OVH Web stuff as above
+```
+Go to OVH Web > Domains > mydomain.fr > DNS zone > Add an entry > A
+
+Sub-domain : algocd .mydomain.fr
+Target : 51.178.XXX.XXX
+
+```bash
 On browser : http://argocd.mydomain.fr/
 ```
 
