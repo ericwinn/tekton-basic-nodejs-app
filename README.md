@@ -89,6 +89,7 @@ Open browser, 51.178.XXX.XXX > Advanced parameters > Continue > Username/Passwor
 - Project : default
 - Sync policy : Automatic
 - Sync option : checked use a schema to validate resource manifest
+- Prune : automatic (??)
 - Source : (your github forked URL) https://github.com/dleurs/tekton-basic-nodejs-app with GIT
 - Path : helm
 - Destication, Cluster : kubernetes-admin@<ovh cluster name>
@@ -300,5 +301,18 @@ Target : 51.178.XXX.XXX
 On browser : http://argocd.mydomain.fr/
 ```
 
-## To go beyond -  Step 6 : Setup HTTPS, Cert Manager and Let's Encrypt
+## To go beyond -  Step 8 : Setup HTTPS, Cert Manager and Let's Encrypt
+https://knative.dev/docs/install/any-kubernetes-cluster/#optional-serving-extensions<br/>
+TLS with cert-manager<br/>
+https://knative.dev/docs/serving/installing-cert-manager/<br/>
+https://cert-manager.io/docs/installation/kubernetes/<br/>
+https://knative.dev/docs/serving/using-auto-tls/<br/>
 
+Install cert-manager version 0.12.0 or higher
+```bash
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.2/cert-manager.yaml
+```
+Next, install the component that integrates Knative with cert-manager:
+```bash
+kubectl apply --filename https://github.com/knative/net-certmanager/releases/download/v0.16.0/release.yaml
+```

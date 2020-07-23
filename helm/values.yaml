@@ -22,7 +22,7 @@ knServing:
 image:
   hub: index.docker.io
   repository: dleurs/helloworld-nodejs 
-  tag: 1.0.0
+  tag: 1.0.1
 
 tekton:
   serviceAccount:
