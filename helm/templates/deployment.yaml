@@ -19,7 +19,7 @@ spec:
         app: {{ .Values.deployment.name }}
     spec:
       containers:
-      - image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+      - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         name: {{ .Values.deployment.name }}
         ports:
         - containerPort: {{ .Values.deployment.containerPort }}

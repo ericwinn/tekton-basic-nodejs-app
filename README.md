@@ -27,8 +27,11 @@ kubectl create secret docker-registry docker-creds \
                     --docker-password=<your-pword> 
 ```
 fork https://github.com/dleurs/tekton-basic-nodejs-app<br/> 
-Change helm/values.yaml > tekton.gitSourceResc.gitUrl to your git url forked<br/> 
-Change helm/Charts.yaml > version: 0.1.0 and appVersion: 1.0.0 <br/> 
+Change helm/values.yaml :
+- tekton.gitSourceResc.gitUrl to your git url forked
+- image.repository to docker repo
+- image.tag to 1.0.0
+Change helm/Charts.yaml > version: 0.1.0 <br/> 
 
 ## Step 3 : Installing AlgoCD 
 https://argoproj.github.io/argo-cd/getting_started/<br/>
@@ -61,6 +64,10 @@ argocd login 51.178.XXX.XXX
 argocd cluster add # Get the list of k8s contexts
 argocd cluster add kubernetes-admin@<cluster name>
 ```
+In your github folked
+```bash
+git add -A; git commit -m "commit msg : initial commit, Hello World"; git push origin master;
+```
 Open browser, 51.178.XXX.XXX > Advanced parameters > Continue > Username/Password Sign In > New App > Helloworld-nodejs > <br/>
 - Application Name : helloworld-nodejs
 - Project : default
@@ -70,26 +77,35 @@ Open browser, 51.178.XXX.XXX > Advanced parameters > Continue > Username/Passwor
 - Path : helm
 - Destication, Cluster : kubernetes-admin@<ovh cluster name>
 - namespace : default
-- in Helm, change image.repository and tekton.gitSourceResc.gitUrl
+- in Helm, check 
 - Go on top, Create
 ```bash
 argocd app list
 argocd app get helloworld-nodejs
 argocd app sync helloworld-nodejs
-```
-On navigator, http://51.178.XX.XXX, => Hello World!
-push "AlgoCD working with helm"
-```bash
-res > main, modify "Hello World!" to "Hello World 2!"
-```
-```bash
-docker build . -t dleurs/helloworld-nodejs:1.0.2
-docker push dleurs/helloworld-nodejs:1.0.2
-```
 
-helm > chart, appVersion 1.0.2
+tkn taskrun list
+tkn taskrun describe build-task-run-1-0-0
+tkn taskrun logs build-task-run-1-0-0
+```
+```bash
+kubectl get svc argocd-server -n argocd
+```
+On navigator, algocd interface, you will be able to see Deployment, service and tekton taskrun<br/>
+```bash
+kubectl get svc helloworld-nodejs-svc 
+```
+On navigator, http://51.178.XXX.XXX, => Hello World!
 
-git push
+## Step 4 : Test CICD
+
+In res > main, modify "Hello World!" to "Hello World 2!"<br/>
+
+In helm > Values, change image.tag from 1.0.0 to 1.0.1 <br/>
+In helm > Chart, version: from 0.1.0 to 0.1.1 <br/>
+```bash
+git add -A; git commit -m "commit msg : Hello World 1 now"; git push origin master
+```
 ```bash
 argocd app set helloworld-nodejs --sync-policy automated
 ```

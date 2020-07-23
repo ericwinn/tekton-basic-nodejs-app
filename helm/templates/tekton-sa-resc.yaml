@@ -15,7 +15,7 @@ spec:
   type: image
   params:
     - name: url
-      value: "{{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+      value: "{{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
