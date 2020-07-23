@@ -95,7 +95,9 @@ On navigator, algocd interface, you will be able to see Deployment, service and 
 ```bash
 kubectl get svc helloworld-nodejs-svc 
 ```
-On navigator, http://51.178.XXX.XXX, => Hello World!
+```bash
+curl 51.178.XXX.XXX # Hello World !
+```
 
 ## Step 4 : Test CICD
 
@@ -107,13 +109,13 @@ In helm > Chart, version: from 0.1.0 to 0.1.1 <br/>
 git add -A; git commit -m "commit msg : Hello World 1 now"; git push origin master
 ```
 ```bash
-argocd app set helloworld-nodejs --sync-policy automated
+tkn taskrun list
+tkn taskrun describe build-task-run-1-0-1
+tkn taskrun logs build-task-run-1-0-1
 ```
-By default (and as a safety mechanism), automated sync will not delete resources when Argo CD detects the resource is no longer defined in Git. To prune the resources, a manual sync can always be performed (with pruning checked). Pruning can also be enabled to happen automatically as part of the automated sync by running
 ```bash
-# argocd app set <APPNAME> --auto-prune 
+curl 51.178.XXX.XXX # Hello World 2!
 ```
-
 
 
 ## Other stuff : Using flux => NOT WORKING
