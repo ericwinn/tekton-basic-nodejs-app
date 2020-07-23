@@ -117,34 +117,8 @@ git add -A; git commit -m "commit msg : Hello World 1 now"; git push origin mast
 tkn taskrun list
 tkn taskrun describe build-task-run-1-0-1
 tkn taskrun logs build-task-run-1-0-1
+kubectl get pod
 ```
 ```bash
 curl 51.178.XXX.XXX # Hello World 2!
-```
-
-
-## Other stuff : Using flux => NOT WORKING
-https://docs.fluxcd.io/en/latest/tutorials/get-started-helm/
-```bash
-helm repo add fluxcd https://charts.fluxcd.io
-kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/crds.yaml
-```
-```bash
-kubectl create namespace flux
-```
-```bash
-helm upgrade -i flux fluxcd/flux \
-   --set git.url=git@github.com:dleurs/tekton-basic-nodejs-app \
-   --namespace flux
-```
-```bash
-helm upgrade -i helm-operator fluxcd/helm-operator \
-   --set git.ssh.secretName=flux-git-deploy \
-   --namespace flux
-```
-```bash
-fluxctl identity --k8s-fwd-ns flux
-```
-Open GitHub, navigate to your fork, go to Setting > Deploy keys, click on Add deploy key, give it a Title, check Allow write access, paste the Flux public key and click Add key.
-```bash
 ```
