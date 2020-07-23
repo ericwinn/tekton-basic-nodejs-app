@@ -302,23 +302,3 @@ On browser : http://argocd.mydomain.fr/
 
 ## To go beyond -  Step 6 : Setup HTTPS, Cert Manager and Let's Encrypt
 
-### Install cert-manager
-https://cert-manager.io/docs/installation/kubernetes/#installing-with-helm
-```bash
-kubectl create namespace cert-manager
-helm repo add jetstack https://charts.jetstack.io
-helm repo update
-```
-```bash
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.1/cert-manager-legacy.crds.yaml
-
-helm install \
-  cert-manager jetstack/cert-manager \
-  --namespace cert-manager \
-  --version v0.15.1
-```
-```bash
-kubectl get pods --namespace cert-manager
-```
-```bash
-```
