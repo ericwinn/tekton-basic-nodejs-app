@@ -1,4 +1,5 @@
-### Simple CICD workflow for a HelloWorld NodeJS in Kubernetes
+# Simple CICD workflow for a HelloWorld NodeJS in Kubernetes
+GitOps / Kubernetes / Docker / ArgoCD / Helm / NodeJS / TypeScript
 ## Step 1 : Build k8s cluster on OVH
 
 Go to https://www.ovh.com/manager/public-cloud/; Managed Kubernetes Service<br/>
