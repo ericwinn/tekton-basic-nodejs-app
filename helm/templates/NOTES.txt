@@ -1,0 +1,4 @@
+CICD HelloWorld on Kubernetes with AlgoCD/Helm/Tekton launched !
+To check that docker image "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}" build and pushed to docker.io : 
+   tkn service describe {{ .Values.tekton.taskRun.name }}-{{ .Chart.AppVersion | replace "." "-" }}
+   tkn service logs {{ .Values.tekton.taskRun.name }}-{{ .Chart.AppVersion | replace "." "-" }}
