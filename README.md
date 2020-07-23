@@ -303,120 +303,22 @@ Target : 51.178.XXX.XXX
 On browser : http://argocd.mydomain.fr/
 ```
 
-
-
-
-
-
-
-## To go beyond -  Step 8 : Setup HTTPS, Cert Manager and Let's Encrypt [NOT WORKING]
-https://knative.dev/docs/install/any-kubernetes-cluster/#optional-serving-extensions<br/>
-TLS with cert-manager<br/>
-https://knative.dev/docs/serving/installing-cert-manager/<br/>
-https://cert-manager.io/docs/installation/kubernetes/<br/>
-https://knative.dev/docs/serving/using-auto-tls/<br/>
-
-Install cert-manager version 0.12.0 or higher
-```bash
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.2/cert-manager.yaml
-```
-Next, install the component that integrates Knative with cert-manager:
-```bash
-kubectl apply --filename https://github.com/knative/net-certmanager/releases/download/v0.16.0/release.yaml
-```
-
-### Manually get certificate with Certbot [NOT WORKING]
-https://certbot.eff.org/docs/install.html#certbot-auto<br/>
-Not working
-```bash
-sudo docker run -it --rm --name certbot \
-            -v "/etc/letsencrypt:/etc/letsencrypt" \
-            -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
-            certbot/certbot certonly
-```
-```bash
-certbot-auto certonly --manual --preferred-challenges dns -d '*.default.mydomain.fr'
-```
-### Automatic TLS certificate provisioning [NOT WORKING]
-https://www.ovh.com/fr/ssl-gateway/
-https://knative.dev/docs/serving/installing-cert-manager/
-https://knative.dev/docs/serving/using-auto-tls/
-### Install cert-manager
-```bash
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.2/cert-manager.yaml
-```
-```bash
-kubectl apply --filename https://github.com/knative/net-certmanager/releases/download/v0.16.0/release.yaml
-```
-https://cert-manager.io/docs/configuration/acme/dns01/
-```bash
-kubectl apply -f - <<EOF
-apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-http01-issuer
-spec:
-  acme:
-    privateKeySecretRef:
-      name: letsencrypt
-    server: https://acme-v02.api.letsencrypt.org/directory
-    solvers:
-    - http01:
-       ingress:
-         class: istio
-EOF
-```
-```bash
-kubectl get clusterissuer letsencrypt-http01-issuer --output yaml
-```
-The Status.Conditions should include Ready=True
-```bash
-kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-nscert.yaml
-```
-```bash
-kubectl edit configmap config-certmanager --namespace knative-serving
-
-...
-data:
-...
-  issuerRef: |
-    kind: ClusterIssuer
-    name: letsencrypt-issuer
-```
-
-```bash
-kubectl edit configmap config-network --namespace knative-serving
-
-...
-data:
-...
-  autoTLS: Enabled
-  httpProtocol: Redirected # or Enable
-...
-```
-```bash
-kubectl apply -f https://raw.githubusercontent.com/knative/docs/master/docs/serving/autoscaling/autoscale-go/service.yaml
-```
-
-
-### Manualy TLS certificate provisioning DNS01 
+## Go Beyond - Step 8 - Get HTTPS with OVH
 1. https://knative.dev/docs/install/any-kubernetes-cluster/#optional-serving-extensions
-2. https://knative.dev/docs/serving/installing-cert-manager/
-3. https://cert-manager.io/docs/configuration/acme/dns01/
-4. https://buzut.net/certbot-challenge-dns-ovh-wildcard/
-5. https://knative.dev/docs/serving/using-auto-tls/
-6. https://knative.dev/docs/serving/using-a-tls-cert/#manually-adding-a-tls-certificate
+2. https://buzut.net/certbot-challenge-dns-ovh-wildcard/
+3. https://knative.dev/docs/serving/using-a-tls-cert/#manually-adding-a-tls-certificate
+
 
 ```bash
 kubectl apply --filename https://github.com/knative/net-certmanager/releases/download/v0.16.0/release.yaml
 ```
 4. 
 ```bash
-# apt install python3-pip
+# Find a way to get pip with python3, apt install python3-pip
 pip install certbot
 pip install certbot-dns-ovh
 ```
-https://api.ovh.com/createToken/
+Go to https://api.ovh.com/createToken/
 ```bash
 -OVH ID
 -OVH Password
@@ -469,15 +371,13 @@ kubectl edit gateway knative-ingress-gateway --namespace knative-serving
         privateKey: /etc/istio/ingressgateway-certs/tls.key
         serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
 ```
-```bash
 https://knative.dev/docs/serving/using-auto-tls/
-```
 ```bash
+(Not sure about this)
 kubectl edit configmap config-network --namespace knative-serving
-```
-```bash
-```
-```bash
-```
-```bash
+
+apiVersion: v1
+data:
+  autoTLS: Enable
+  httpProtocol: Redirected
 ```
