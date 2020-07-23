@@ -301,7 +301,13 @@ Target : 51.178.XXX.XXX
 On browser : http://argocd.mydomain.fr/
 ```
 
-## To go beyond -  Step 8 : Setup HTTPS, Cert Manager and Let's Encrypt
+
+
+
+
+
+
+## To go beyond -  Step 8 : Setup HTTPS, Cert Manager and Let's Encrypt [NOT WORKING]
 https://knative.dev/docs/install/any-kubernetes-cluster/#optional-serving-extensions<br/>
 TLS with cert-manager<br/>
 https://knative.dev/docs/serving/installing-cert-manager/<br/>
@@ -330,4 +336,54 @@ sudo docker run -it --rm --name certbot \
 certbot-auto certonly --manual --preferred-challenges dns -d '*.default.mydomain.fr'
 ```
 ### Automatic TLS certificate provisioning 
+https://www.ovh.com/fr/ssl-gateway/
 https://knative.dev/docs/serving/using-auto-tls/
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-http01-issuer
+spec:
+  acme:
+    privateKeySecretRef:
+      name: letsencrypt
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+       ingress:
+         class: istio
+EOF
+```
+```bash
+kubectl get clusterissuer letsencrypt-http01-issuer --output yaml
+```
+The Status.Conditions should include Ready=True
+```bash
+kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-nscert.yaml
+```
+```bash
+kubectl edit configmap config-certmanager --namespace knative-serving
+
+...
+data:
+...
+  issuerRef: |
+    kind: ClusterIssuer
+    name: letsencrypt-issuer
+```
+
+```bash
+kubectl edit configmap config-network --namespace knative-serving
+
+...
+data:
+...
+  autoTLS: Enabled
+  httpProtocol: Redirected # or Enable
+...
+```
+```bash
+kubectl apply -f https://raw.githubusercontent.com/knative/docs/master/docs/serving/autoscaling/autoscale-go/service.yaml
+```
