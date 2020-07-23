@@ -17,8 +17,6 @@ knServing:
   scaleToZero: false
   clusterLocal: false
 
-  coldStart: 
-
 image:
   hub: index.docker.io
   repository: dleurs/helloworld-nodejs 

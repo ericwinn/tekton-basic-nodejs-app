@@ -316,3 +316,18 @@ Next, install the component that integrates Knative with cert-manager:
 ```bash
 kubectl apply --filename https://github.com/knative/net-certmanager/releases/download/v0.16.0/release.yaml
 ```
+
+### Manually get certificate with Certbot [NOT WORKING]
+https://certbot.eff.org/docs/install.html#certbot-auto<br/>
+Not working
+```bash
+sudo docker run -it --rm --name certbot \
+            -v "/etc/letsencrypt:/etc/letsencrypt" \
+            -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
+            certbot/certbot certonly
+```
+```bash
+certbot-auto certonly --manual --preferred-challenges dns -d '*.default.mydomain.fr'
+```
+### Automatic TLS certificate provisioning 
+https://knative.dev/docs/serving/using-auto-tls/
