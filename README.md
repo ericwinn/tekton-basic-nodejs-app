@@ -34,7 +34,7 @@ Change helm/values.yaml :
 - image.repository to docker repo
 - image.tag to 1.0.0
 - knService.use : false
-Change helm/Charts.yaml > version: 0.1.0 <br/> 
+- Change helm/Charts.yaml > version: 0.1.0 <br/> 
 
 If you are using a private git repo, please look at :<br/>
 https://github.com/dleurs/tekton-basic-nodejs-app-private-repo
@@ -224,7 +224,8 @@ kubectl get pods --namespace istio-system
 kubectl get pods --namespace knative-serving
 ```
 
-### Test with a hello world
+## Go Beyond - Step 6 - HelloWorld NodeJS with Knative Serving
+
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: serving.knative.dev/v1 # Current version of Knative
@@ -248,8 +249,6 @@ spec:
 EOF
 ```
 
-## Go Beyond - Step 6 - HelloWorld NodeJS with Knative Serving
-
 Helm > values.yaml > knService.use : true
 ```bash
 git add -A; git commit -m "Use Knative and Istio"; git push origin master;
@@ -267,7 +266,7 @@ curl -H "Host: helloworld-nodejs.default.example.com" http://51.178.XXX.XXX # He
 https://www.ovh.com/manager/web/<br/>
 You will need a domain for the following, you can buy one on OVH, a .fr cost 5 euros.<br/>
 Here we will use mydomain.fr as an example<br/>
-First, get external IP of Istio
+First, get external IP of Istio<br/>
 ```bash
 kubectl --namespace istio-system get service istio-ingressgateway # Take External IP 51.178.XXX.XXX
 ```
@@ -294,19 +293,20 @@ Same for argocd server
 ```bash
 kubectl get svc argocd-server -n argocd # 51.178.XXX.XXX
 ```
-Go to OVH Web > Domains > mydomain.fr > DNS zone > Add an entry > A
+Go to OVH Web > Domains > mydomain.fr > DNS zone > Add an entry > A<br/>
 
-Sub-domain : algocd .mydomain.fr
-Target : 51.178.XXX.XXX
+Sub-domain : algocd .mydomain.fr<br/>
+Target : 51.178.XXX.XXX<br/>
 
 ```bash
 On browser : http://argocd.mydomain.fr/
 ```
 
-## Go Beyond - Step 8 - Get HTTPS with OVH
+## Go Beyond - Step 8 - Get HTTPS with OVH manually
 1. https://knative.dev/docs/install/any-kubernetes-cluster/#optional-serving-extensions
 2. https://buzut.net/certbot-challenge-dns-ovh-wildcard/
-3. https://knative.dev/docs/serving/using-a-tls-cert/#manually-adding-a-tls-certificate
+3. https://api.ovh.com/createToken/
+4. https://knative.dev/docs/serving/using-a-tls-cert/#manually-adding-a-tls-certificate
 
 
 ```bash
@@ -318,12 +318,11 @@ kubectl apply --filename https://github.com/knative/net-certmanager/releases/dow
 pip install certbot
 pip install certbot-dns-ovh
 ```
-Go to https://api.ovh.com/createToken/
-```bash
--OVH ID
--OVH Password
+Go to https://api.ovh.com/createToken/<br/>
+- OVH ID
+- OVH Password
 - Validity Unlimited
-
+```bash
 GET /domain/zone/
 GET /domain/zone/{mydomain.fr}/status
 GET /domain/zone/{mydomain.fr}/record
@@ -359,25 +358,124 @@ kubectl create --namespace istio-system secret tls istio-ingressgateway-certs \
 ```bash
 kubectl edit gateway knative-ingress-gateway --namespace knative-serving
 
-#in spec:servers:, after http
-    - hosts:
-        - "*"
-      port:
-        name: https
-        number: 443
-        protocol: HTTPS
-      tls:
-        mode: SIMPLE
-        privateKey: /etc/istio/ingressgateway-certs/tls.key
-        serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-```
-https://knative.dev/docs/serving/using-auto-tls/
-```bash
-(Not sure about this)
-kubectl edit configmap config-network --namespace knative-serving
 
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - '*'
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+  - hosts:
+    - '*'
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+```
+
+
+## Go Beyond - Step 9 - [Not working, still by hand] Auto-renew TLS certificate
+```bash
+kubectl create secret generic ovh-dns-creds --from-file=/Users/dimitrileurs/.ovhapi
+```
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  creationTimestamp: null
+  labels:
+    run: certbot-renew-ovh
+  name: certbot-renew-ovh
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+      - image: certbot/dns-ovh:v1.6.0
+        name: certbot-renew-ovh
+        resources: {}
+        args:
+          #- certbot
+          - certonly
+          - "--dns-ovh"
+          - "--dns-ovh-credentials"
+          - "/etc/ovh-dns-creds/.ovhapi"
+          - "--non-interactive"
+          - "--agree-tos" 
+          - "--email"
+          - contact@dleurs.fr
+          - "-d"
+          - "*.me.dleurs.fr"
+          #- "--config-dir"
+          #- "/mnt/data"
+          - "--post-hook"
+          - "cat /etc/letsencrypt/live/me.dleurs.fr/privkey.pem && cat /etc/letsencrypt/live/me.dleurs.fr/fullchain.pem"
+        volumeMounts:
+          - mountPath: "/etc/ovh-dns-creds"
+            name: ovh-dns-creds
+          - mountPath: "/mnt/data"
+            name: ovh-dns-certs-storage
+            readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      volumes:
+      - name: ovh-dns-creds
+        secret:
+          secretName: ovh-dns-creds
+      #- name: ovh-dns-certs-storage hostPath not working, because docker image not running as root, no right to write
+      #  persistentVolumeClaim:
+      #    claimName: task-pv-claim
+EOF
+```
+
+```bash
+kubectl get pod
+kubectl logs
+```
+
+```bash
+cat <<EOF | kubectl apply -f -
 apiVersion: v1
-data:
-  autoTLS: Enable
-  httpProtocol: Redirected
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: test-certbot-renew-ovh
+  name: test-certbot-renew-ovh
+spec:
+  containers:
+  - image: busybox
+    name: test-certbot-renew-ovh
+    resources: {}
+    args:
+      - sleep
+      - "3000"
+    volumeMounts:
+      - mountPath: "/etc/ovh-dns-creds"
+        name: ovh-dns-creds
+        readOnly: true
+      - mountPath: "/mnt/data"
+        name: ovh-dns-certs-storage
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: ovh-dns-creds
+    secret:
+      secretName: ovh-dns-creds
+  - name: ovh-dns-certs-storage
+    persistentVolumeClaim:
+      claimName: task-pv-claim
+status: {}
+EOF
 ```
