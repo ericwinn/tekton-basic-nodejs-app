@@ -10,7 +10,7 @@ kind: PipelineResource
 metadata:
   name: {{ .Values.tekton.dockerTargetResc.name }}
   annotations:
-    helm.sh/hook: pre-install
+    argocd.argoproj.io/hook: PreSync
 spec:
   type: image
   params:

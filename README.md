@@ -479,3 +479,30 @@ spec:
 status: {}
 EOF
 ```
+
+## Gitlab
+https://docs.gitlab.com/charts/installation/deployment.html
+
+Set TLS for gitlab.mydomain.fr
+```bash
+sudo certbot certonly --dns-ovh --dns-ovh-credentials ~/.ovhapi -d "gitlab.mydomain.fr"
+```
+```bash
+sudo kubectl create secret tls tls-gitlab --cert=/etc/letsencrypt/live/gitlab.mydomain.fr/fullchain.pem --key=/etc/letsencrypt/live/gitlab.mydomain.fr/privkey.pem
+```
+```bash
+helm repo add gitlab https://charts.gitlab.io/
+helm repo update
+```
+```bash
+helm upgrade --install gitlab gitlab/gitlab \
+--timeout 600s \
+--set global.hosts.domain=dleurs.fr \
+--set global.ingress.configureCertmanager=false \
+--set global.ingress.tls.secretName=tls-gitlab
+```
+
+```bash
+k get svc gitlab-nginx-ingress-controller
+```
+Get the External IP and go to https://www.ovh.com/manager/web/ to add A record
