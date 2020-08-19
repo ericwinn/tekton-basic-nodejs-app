@@ -481,6 +481,7 @@ EOF
 ```
 
 ## Gitlab
+https://docs.gitlab.com/charts/<br/>
 https://docs.gitlab.com/charts/installation/deployment.html
 
 Set TLS for gitlab.mydomain.fr
@@ -506,3 +507,18 @@ helm upgrade --install gitlab gitlab/gitlab \
 k get svc gitlab-nginx-ingress-controller
 ```
 Get the External IP and go to https://www.ovh.com/manager/web/ to add A record
+
+```bash
+savePath=$(pwd)
+cd /etc
+sudo mkdir gitlab
+sudo vim /etc/gitlab/gitlab.rb
+```
+```bash
+external_url "https://gitlab.mydomain.fr"
+nginx['redirect_http_to_https'] = true
+```
+```bash
+cd $savePath
+```
+Push not worked
