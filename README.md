@@ -28,7 +28,7 @@ kubectl create secret docker-registry docker-creds \
                     --docker-username=<your-name> \
                     --docker-password=<your-pword> 
 ```
-fork https://github.com/dleurs/tekton-basic-nodejs-app<br/> 
+fork https://github.com/ericwinn/tekton-basic-nodejs-app<br/> 
 Change helm/values.yaml :
 - tekton.gitSourceResc.gitUrl to your git url forked
 - image.repository to docker repo
@@ -37,7 +37,7 @@ Change helm/values.yaml :
 - Change helm/Charts.yaml > version: 0.1.0 <br/> 
 
 If you are using a private git repo, please look at :<br/>
-https://github.com/dleurs/tekton-basic-nodejs-app-private-repo
+https://github.com/ericwinn/tekton-basic-nodejs-app-private-repo
 
 
 Get helm cli : https://helm.sh/docs/intro/install/
@@ -69,9 +69,9 @@ Wait for external IP
 ```bash
 kubectl get svc argocd-server -n argocd
 ```
-Get the password :  (username: admin)
+Get the initial password :  (username: admin)
 ```bash
-kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o name | cut -d'/' -f 2
+kubectl -n argocd get secret argocd-initial-admin-secret -o json |jq -r .data.password |base64 -d
 ```
 ```bash
 argocd login 51.178.XXX.XXX
@@ -84,13 +84,13 @@ In your github folked
 ```bash
 git add -A; git commit -m "commit msg : initial commit, Hello World"; git push origin master;
 ```
-Open browser, 51.178.XXX.XXX > Advanced parameters > Continue > Username/Password Sign In > New App > Helloworld-nodejs > <br/>
+Open browser, 51.178.XXX.XXX > Username/Password Sign In > New App > Helloworld-nodejs > <br/>
 - Application Name : helloworld-nodejs
 - Project : default
 - Sync policy : Automatic
 - Sync option : checked use a schema to validate resource manifest
 - Prune : automatic (??)
-- Source : (your github forked URL) https://github.com/dleurs/tekton-basic-nodejs-app with GIT
+- Source : (your github forked URL) https://github.com/ericwinn/tekton-basic-nodejs-app with GIT
 - Path : helm
 - Destication, Cluster : kubernetes-admin@<ovh cluster name>
 - namespace : default

@@ -1,4 +1,3 @@
-{{ if eq .Values.knServing.use false }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +20,7 @@ spec:
         app: {{ .Values.deployment.name }}
     spec:
       containers:
-      - image: "{{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      - image: "{{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}-latest"
         name: {{ .Values.deployment.name }}
         ports:
         - containerPort: {{ .Values.deployment.containerPort }}
@@ -32,5 +31,4 @@ spec:
             value: "{{ .Values.deployment.nodeEnv }}"
         resources: {}
 status: {}
-{{ end }}
 

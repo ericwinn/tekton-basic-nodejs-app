@@ -1,41 +1,27 @@
 deployment: # used only if knativeServing.use: false
   name: helloworld-nodejs
   namespace: default
-  replicaCount: 1
+  replicaCount: 2
   containerPort: 8080
   nodeEnv: development
 
-service: # used only if knativeServing.use: false
-  name: helloworld-nodejs-svc
-  namespace: default
+service:
+  type: ClusterIP
   port: 80
 
-knServing:
-  use: true
-  name: helloworld-nodejs
-  namespace: default
-  scaleToZero: false
-  clusterLocal: false
-
 image:
-  hub: index.docker.io
-  repository: dleurs/helloworld-nodejs 
-  tag: 1.0.1
+  hub: registry-vpc.cn-hongkong.aliyuncs.com
+  repository: infra/devops-argocd-test
+  tag: helloworld-nodejs
+
+secret:
+  dockerCredentials: docker-credentials
 
 tekton:
-  serviceAccount:
-    name: tekton-sa
-    secretDockerCredsName: docker-creds
-  dockerTargetResc:
-    name: docker-target-resc
-  gitSourceResc:
-    name: git-source-resc
-    gitUrl: https://github.com/dleurs/tekton-basic-nodejs-app
-  task:
-    name: build-task
-    kanikoVersion: v0.16.0
-  taskRun:
-    name: build-task-run
-    paramsSet: false
-    pathToDockerFile: 
-    pathToContext: 
+  Pipeline:
+    name: helloworld-nodejs
+    workspaces:
+      name: shared-data
+  Source:
+    name: tekton-basic-nodejs-app
+    gitUrl: https://github.com/ericwinn/tekton-basic-nodejs-app.git

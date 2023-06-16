@@ -1,0 +1,73 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: {{ .Values.tekton.Pipeline.name }}
+spec:
+  description: |
+    This pipeline clones a git repo, builds a Docker image with Kaniko and
+    pushes it to a registry
+  params:
+    - name: url
+      type: string
+    - name: image
+      type: string
+  workspaces:
+    - name: sharedData
+    - name: dockerCredentials
+  tasks:
+    - name: sync-application
+      taskRef:
+        name: argocd-task-sync-and-wait
+      params:
+        - name: application-name
+          value: {{ .Values.tekton.Pipeline.name }}
+        - name: flags
+          value: --insecure
+    - name: fetch-source
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: sharedData
+      params:
+        - name: url
+          value: $(params.url)
+    - name: build-push
+      runAfter: ["fetch-source"]
+      taskRef:
+        name: kaniko
+      workspaces:
+        - name: source
+          workspace: sharedData
+        - name: dockerconfig
+          workspace: dockerCredentials
+      params:
+        - name: IMAGE
+          value: $(params.image)-$(tasks.fetch-source.results.commit)
+        - name: EXTRA_ARGS
+          value:
+            - --destination=$(params.image)-latest
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: {{ .Values.tekton.Pipeline.name }}-run
+spec:
+  pipelineRef:
+    name: {{ .Values.tekton.Pipeline.name }}
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
+  workspaces:
+    - name: sharedData
+      persistentVolumeClaim:
+        claimName: {{ .Values.tekton.Pipeline.workspaces.name }}
+      subPath: {{ .Values.tekton.Source.name }}
+    - name: dockerCredentials
+      secret:
+        secretName: {{ .Values.secret.dockerCredentials }}
+  params:
+    - name: url
+      value: {{ .Values.tekton.Source.gitUrl }}
+    - name: image
+      value: {{ .Values.image.hub }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
