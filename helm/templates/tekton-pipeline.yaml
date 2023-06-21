@@ -15,14 +15,14 @@ spec:
     - name: sharedData
     - name: dockerCredentials
   tasks:
-    - name: sync-application
-      taskRef:
-        name: argocd-task-sync-and-wait
-      params:
-        - name: application-name
-          value: {{ .Values.tekton.Pipeline.name }}
-        - name: flags
-          value: --insecure
+#    - name: sync-application
+#      taskRef:
+#        name: argocd-task-sync-and-wait
+#      params:
+#        - name: application-name
+#          value: {{ .Values.tekton.Pipeline.name }}
+#        - name: flags
+#          value: --insecure
     - name: fetch-source
       taskRef:
         name: git-clone
