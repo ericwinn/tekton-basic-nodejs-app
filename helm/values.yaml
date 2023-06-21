@@ -11,7 +11,7 @@ service:
 
 image:
   hub: registry-vpc.cn-hongkong.aliyuncs.com
-  repository: infra/devops-argocd-test
+  repository: construct-infra/devops-argocd-test
   tag: helloworld-nodejs
 
 secret:
